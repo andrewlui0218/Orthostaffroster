@@ -198,6 +198,8 @@ export default function App() {
     }
   };
 
+  const displayedStaff = getStaffByRole(activeTab);
+
   return (
     <div className="h-screen bg-gray-50 flex flex-col md:flex-row font-sans text-gray-900 overflow-hidden relative">
       
@@ -232,7 +234,10 @@ export default function App() {
       >
         <div className="p-4">
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-1">
-            <Users className="w-6 h-6" /> Staff
+            <Users className="w-6 h-6" /> Staff Pool
+            <span className="text-sm font-normal text-gray-400 ml-auto bg-gray-100 px-2 py-0.5 rounded-full">
+              {displayedStaff.length}
+            </span>
           </h1>
           <p className="text-sm text-gray-500 mb-3">Drag or click to assign.</p>
           
@@ -252,7 +257,7 @@ export default function App() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 pb-2 grid grid-cols-2 gap-2 content-start">
-          {getStaffByRole(activeTab).map(staff => (
+          {displayedStaff.map(staff => (
             <Magnet 
               key={staff.id}
               staff={staff} 
@@ -354,7 +359,7 @@ export default function App() {
 
           {/* Horizontal Staff List */}
           <div className="overflow-x-auto whitespace-nowrap p-2 bg-white min-h-[60px] flex items-center gap-2">
-             {getStaffByRole(activeTab).map(staff => (
+             {displayedStaff.map(staff => (
                <div key={staff.id} className="inline-block shrink-0">
                   <div 
                     onClick={() => handleStaffClick(staff.id)}
