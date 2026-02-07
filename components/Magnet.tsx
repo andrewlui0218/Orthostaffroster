@@ -3,7 +3,8 @@ import { StaffMember } from '../types';
 
 interface MagnetProps {
   staff: StaffMember;
-  onDragStart?: (e: React.DragEvent, staffId: string) => void;
+  onDragStart?: (e: React.DragEvent<HTMLDivElement>, staffId: string) => void;
+  onTouchStart?: (e: React.TouchEvent<HTMLDivElement>, staffId: string) => void;
   isDragging?: boolean;
   onClick?: () => void;
   isSelected?: boolean;
@@ -13,6 +14,7 @@ interface MagnetProps {
 export const Magnet: React.FC<MagnetProps> = ({ 
   staff, 
   onDragStart, 
+  onTouchStart,
   isDragging,
   onClick,
   isSelected,
@@ -27,6 +29,7 @@ export const Magnet: React.FC<MagnetProps> = ({
     <div
       draggable={!!onDragStart}
       onDragStart={(e) => onDragStart && onDragStart(e, staff.id)}
+      onTouchStart={(e) => onTouchStart && onTouchStart(e, staff.id)}
       onClick={onClick}
       className={`
         relative 
@@ -34,7 +37,7 @@ export const Magnet: React.FC<MagnetProps> = ({
         ${bgColor} 
         border border-gray-400 shadow-sm
         ${onDragStart ? 'cursor-grab active:cursor-grabbing' : ''}
-        select-none
+        select-none touch-none
         transform transition-all duration-200
         text-center font-semibold text-gray-800 
         ${cx('text-[9px] sm:text-[10px]', 'text-sm')} font-handwriting
@@ -45,6 +48,8 @@ export const Magnet: React.FC<MagnetProps> = ({
       `}
       style={{
         transform: isSelected ? 'rotate(0deg)' : `rotate(${staff.name.length % 2 === 0 ? '1deg' : '-1deg'})`,
+        // Prevent default browser touch actions (scrolling) when touching the magnet
+        touchAction: 'none'
       }}
     >
       {!isSelected && (

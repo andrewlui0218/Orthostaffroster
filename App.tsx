@@ -110,14 +110,14 @@ export default function App() {
 
   // --- Mouse Drag Handlers (Desktop) ---
 
-  const handleDragStart = (e: React.DragEvent, id: string, source: 'pool' | 'grid', sourceCellId?: string) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string, source: 'pool' | 'grid', sourceCellId?: string) => {
     const item: DragItem = { id, source, sourceCellId };
     e.dataTransfer.setData('application/json', JSON.stringify(item));
     e.dataTransfer.effectAllowed = 'move';
     if (selectedStaffId) setSelectedStaffId(null);
   };
 
-  const handleDropOnCell = (e: React.DragEvent, targetCellId: string) => {
+  const handleDropOnCell = (e: React.DragEvent<HTMLDivElement>, targetCellId: string) => {
     e.preventDefault();
     const data = e.dataTransfer.getData('application/json');
     if (!data) return;
@@ -126,7 +126,7 @@ export default function App() {
     moveStaff(item.id, targetCellId, item.source === 'grid' ? item.sourceCellId : undefined);
   };
 
-  const handleDropOnPool = (e: React.DragEvent) => {
+  const handleDropOnPool = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const data = e.dataTransfer.getData('application/json');
     if (!data) return;
@@ -139,7 +139,7 @@ export default function App() {
 
   // --- Touch Drag Handlers (Mobile) ---
 
-  const handleTouchStart = (e: React.TouchEvent, id: string, source: 'pool' | 'grid', sourceCellId?: string) => {
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, id: string, source: 'pool' | 'grid', sourceCellId?: string) => {
     // We allow the browser to handle the start, but we capture metrics.
     // The Magnet component has touch-action: none, which prevents scrolling.
     
@@ -445,8 +445,8 @@ export default function App() {
             <Magnet 
               key={staff.id}
               staff={staff} 
-              onDragStart={(e: React.DragEvent, id: string) => handleDragStart(e, id, 'pool')} 
-              onTouchStart={(e: React.TouchEvent, id: string) => handleTouchStart(e, id, 'pool')}
+              onDragStart={(e: React.DragEvent<HTMLDivElement>, id: string) => handleDragStart(e, id, 'pool')} 
+              onTouchStart={(e: React.TouchEvent<HTMLDivElement>, id: string) => handleTouchStart(e, id, 'pool')}
               onClick={() => handleStaffClick(staff.id)}
               isSelected={selectedStaffId === staff.id}
             />
@@ -551,7 +551,7 @@ export default function App() {
                <div key={staff.id} className="touch-none select-none">
                  <Magnet
                     staff={staff}
-                    onTouchStart={(e: React.TouchEvent, id: string) => handleTouchStart(e, id, 'pool')}
+                    onTouchStart={(e: React.TouchEvent<HTMLDivElement>, id: string) => handleTouchStart(e, id, 'pool')}
                     onClick={() => handleStaffClick(staff.id)}
                     isSelected={selectedStaffId === staff.id}
                  />

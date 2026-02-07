@@ -10,8 +10,9 @@ interface RosterBoardProps {
   selectedStaffId: string | null;
   onColumnClick?: (colId: string) => void;
   onCellClick?: (cellId: string) => void;
-  onDropOnCell?: (e: React.DragEvent, cellId: string) => void;
-  onDragStart?: (e: React.DragEvent, id: string, source: 'pool' | 'grid', sourceCellId?: string) => void;
+  onDropOnCell?: (e: React.DragEvent<HTMLDivElement>, cellId: string) => void;
+  onDragStart?: (e: React.DragEvent<HTMLDivElement>, id: string, source: 'pool' | 'grid', sourceCellId?: string) => void;
+  onTouchStart?: (e: React.TouchEvent<HTMLDivElement>, id: string, source: 'pool' | 'grid', sourceCellId?: string) => void;
   forceDesktop?: boolean;
 }
 
@@ -24,6 +25,7 @@ export const RosterBoard = forwardRef<HTMLDivElement, RosterBoardProps>(({
   onCellClick,
   onDropOnCell,
   onDragStart,
+  onTouchStart,
   forceDesktop = false
 }, ref) => {
 
@@ -42,8 +44,8 @@ export const RosterBoard = forwardRef<HTMLDivElement, RosterBoardProps>(({
         {/* Headers */}
         <div className={`grid ${cx('grid-cols-[2rem_repeat(5,1fr)]', 'grid-cols-[3rem_repeat(5,1fr)]')} ${cx('border-b-[2px]', 'border-b-[4px]')} border-gray-800 shrink-0`}>
            <div className={`bg-gray-200 ${cx('border-r-[2px]', 'border-r-[4px]')} border-gray-800`}></div>
-           <div className={`col-span-2 text-center ${cx('text-xs sm:text-sm', 'text-xl')} font-bold uppercase ${cx('py-1', 'py-2')} ${cx('border-r-[2px]', 'border-r-[4px]')} border-gray-800 bg-gray-100`}>Team 1</div>
-           <div className={`col-span-2 text-center ${cx('text-xs sm:text-sm', 'text-xl')} font-bold uppercase ${cx('py-1', 'py-2')} ${cx('border-r-[2px]', 'border-r-[4px]')} border-gray-800 bg-gray-100`}>Team 2</div>
+           <div className={`col-span-2 text-center ${cx('text-xs sm:text-sm', 'text-xl')} font-bold uppercase ${cx('py-0.5 sm:py-1', 'py-2')} ${cx('border-r-[2px]', 'border-r-[4px]')} border-gray-800 bg-gray-100`}>Team 1</div>
+           <div className={`col-span-2 text-center ${cx('text-xs sm:text-sm', 'text-xl')} font-bold uppercase ${cx('py-0.5 sm:py-1', 'py-2')} ${cx('border-r-[2px]', 'border-r-[4px]')} border-gray-800 bg-gray-100`}>Team 2</div>
            <div className="col-span-1 bg-gray-100"></div>
         </div>
 
@@ -55,7 +57,7 @@ export const RosterBoard = forwardRef<HTMLDivElement, RosterBoardProps>(({
               key={col.id}
               onClick={() => onColumnClick && onColumnClick(col.id)}
               className={`
-                text-center font-bold ${cx('text-[9px] sm:text-xs', 'text-lg')} ${cx('py-1', 'py-2')} truncate px-0.5
+                text-center font-bold ${cx('text-[9px] sm:text-xs', 'text-lg')} ${cx('py-0.5 sm:py-1', 'py-2')} truncate px-0.5
                 ${idx < COLUMNS.length - 1 ? cx('border-r-[2px]', 'border-r-[4px]') + ' border-gray-800' : ''}
                 ${selectedStaffId ? 'bg-blue-50/50 text-blue-800 cursor-pointer' : 'bg-gray-50'}
               `}
@@ -88,7 +90,8 @@ export const RosterBoard = forwardRef<HTMLDivElement, RosterBoardProps>(({
                       id={cellId}
                       staffInCell={staffInCell}
                       onDrop={onDropOnCell}
-                      onDragStart={onDragStart ? (e, sid, from) => onDragStart(e, sid, 'grid', from) : undefined}
+                      onDragStart={onDragStart ? (e: React.DragEvent<HTMLDivElement>, sid: string, from: string) => onDragStart(e, sid, 'grid', from) : undefined}
+                      onTouchStart={onTouchStart ? (e: React.TouchEvent<HTMLDivElement>, sid: string, from: string) => onTouchStart(e, sid, 'grid', from) : undefined}
                       onClick={onCellClick ? () => onCellClick(cellId) : undefined}
                       isHighlighted={!!selectedStaffId}
                       forceDesktop={forceDesktop}

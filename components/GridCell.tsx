@@ -5,8 +5,9 @@ import { Magnet } from './Magnet';
 interface GridCellProps {
   id: string;
   staffInCell: StaffMember[];
-  onDrop?: (e: React.DragEvent, cellId: string) => void;
-  onDragStart?: (e: React.DragEvent, staffId: string, fromCellId: string) => void;
+  onDrop?: (e: React.DragEvent<HTMLDivElement>, cellId: string) => void;
+  onDragStart?: (e: React.DragEvent<HTMLDivElement>, staffId: string, fromCellId: string) => void;
+  onTouchStart?: (e: React.TouchEvent<HTMLDivElement>, staffId: string, fromCellId: string) => void;
   onClick?: () => void;
   isHighlighted?: boolean;
   forceDesktop?: boolean;
@@ -17,6 +18,7 @@ export const GridCell: React.FC<GridCellProps> = ({
   staffInCell, 
   onDrop, 
   onDragStart,
+  onTouchStart,
   onClick,
   isHighlighted,
   forceDesktop = false
@@ -24,7 +26,7 @@ export const GridCell: React.FC<GridCellProps> = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const dragCounter = useRef(0);
 
-  const handleDragEnter = (e: React.DragEvent) => {
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (!onDrop) return;
     dragCounter.current += 1;
@@ -33,7 +35,7 @@ export const GridCell: React.FC<GridCellProps> = ({
     }
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (!onDrop) return;
     dragCounter.current -= 1;
@@ -42,11 +44,11 @@ export const GridCell: React.FC<GridCellProps> = ({
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault(); 
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (!onDrop) return;
     dragCounter.current = 0;
@@ -66,6 +68,7 @@ export const GridCell: React.FC<GridCellProps> = ({
       onDragOver={handleDragOver}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
+      data-cell-id={id} // Helper for Touch DnD detection
       className={`
         h-full w-full 
         flex flex-col items-center justify-center ${pClass}
@@ -74,14 +77,17 @@ export const GridCell: React.FC<GridCellProps> = ({
         ${onClick ? 'cursor-pointer hover:bg-blue-50' : ''}
       `}
     >
-      <div className="flex flex-wrap justify-center content-center w-full gap-0.5">
+      <div className="flex flex-wrap justify-center content-center w-full gap-0.5 pointer-events-none">
+        {/* Pointer events none on wrapper, auto on children to ensure clicks pass through correctly or target magnets */}
         {staffInCell.map((staff) => (
-          <Magnet
-            key={staff.id}
-            staff={staff}
-            onDragStart={onDragStart ? (e) => onDragStart(e, staff.id, id) : undefined}
-            forceDesktop={forceDesktop}
-          />
+          <div key={staff.id} className="pointer-events-auto">
+            <Magnet
+              staff={staff}
+              onDragStart={onDragStart ? (e: React.DragEvent<HTMLDivElement>, staffId: string) => onDragStart(e, staffId, id) : undefined}
+              onTouchStart={onTouchStart ? (e: React.TouchEvent<HTMLDivElement>, staffId: string) => onTouchStart(e, staffId, id) : undefined}
+              forceDesktop={forceDesktop}
+            />
+          </div>
         ))}
       </div>
     </div>
