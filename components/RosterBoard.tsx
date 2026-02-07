@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { StaffMember, RosterState, ColumnId } from '../types';
+import { StaffMember, RosterState } from '../types';
 import { GridCell } from './GridCell';
 import { SESSIONS, COLUMNS } from '../constants';
 

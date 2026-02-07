@@ -100,9 +100,11 @@ export default function App() {
     const item: DragItem = JSON.parse(data);
 
     if (item.source === 'grid' && item.sourceCellId) {
+      // Capture into a const string to satisfy TS that it's not undefined index
+      const cellId = item.sourceCellId;
       setRoster(prev => {
         const newRoster = { ...prev };
-        newRoster[item.sourceCellId] = (newRoster[item.sourceCellId] || []).filter(id => id !== item.id);
+        newRoster[cellId] = (newRoster[cellId] || []).filter(id => id !== item.id);
         return newRoster;
       });
     }
