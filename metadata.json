@@ -1,0 +1,5 @@
+{
+  "name": "Daily Staff Roster",
+  "description": "A digital whiteboard for managing staff daily duty rosters, mimicking a physical magnetic board.",
+  "requestFramePermissions": []
+}
