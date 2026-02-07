@@ -30,6 +30,7 @@ export const INITIAL_STAFF: StaffMember[] = [
   { id: 'michelle_h', name: 'Michelle H', role: 'PT', defaultColor: 'white' },
   { id: 'peter', name: 'Peter', role: 'PT', defaultColor: 'white' },
   { id: 'polly', name: 'Polly', role: 'PT', defaultColor: 'white' },
+  { id: 'primo', name: 'Primo', role: 'PT', defaultColor: 'white' },
   { id: 'richard', name: 'Richard', role: 'PT', defaultColor: 'white' },
   { id: 'sophia', name: 'Sophia', role: 'PT', defaultColor: 'white' },
   { id: 'stephy', name: 'Stephy', role: 'PT', defaultColor: 'white' },
