@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { StaffMember, RosterState } from '../types';
 import { GridCell } from './GridCell';
 import { SESSIONS, COLUMNS } from '../constants';

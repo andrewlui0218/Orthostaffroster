@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { Download, RotateCcw, Users, Loader2, X, Share2, Save } from 'lucide-react';
 import { INITIAL_STAFF, SESSIONS } from './constants';
 import { StaffMember, RosterState } from './types';
