@@ -445,8 +445,8 @@ export default function App() {
             <Magnet 
               key={staff.id}
               staff={staff} 
-              onDragStart={(e, id) => handleDragStart(e, id, 'pool')} 
-              onTouchStart={(e, id) => handleTouchStart(e, id, 'pool')}
+              onDragStart={(e: React.DragEvent, id: string) => handleDragStart(e, id, 'pool')} 
+              onTouchStart={(e: React.TouchEvent, id: string) => handleTouchStart(e, id, 'pool')}
               onClick={() => handleStaffClick(staff.id)}
               isSelected={selectedStaffId === staff.id}
             />
@@ -551,7 +551,7 @@ export default function App() {
                <div key={staff.id} className="touch-none select-none">
                  <Magnet
                     staff={staff}
-                    onTouchStart={(e, id) => handleTouchStart(e, id, 'pool')}
+                    onTouchStart={(e: React.TouchEvent, id: string) => handleTouchStart(e, id, 'pool')}
                     onClick={() => handleStaffClick(staff.id)}
                     isSelected={selectedStaffId === staff.id}
                  />
