@@ -1,23 +1,10 @@
-import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
-import { Download, RotateCcw, Users, CheckCircle2, Loader2, X, Share2, Save } from 'lucide-react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
+import { Download, RotateCcw, Users, Loader2, X, Share2, Save } from 'lucide-react';
 import { INITIAL_STAFF, SESSIONS } from './constants';
-import { StaffMember, RosterState, DragItem } from './types';
+import { StaffMember, RosterState } from './types';
 import { Magnet } from './components/Magnet';
 import { RosterBoard } from './components/RosterBoard';
 import { generateRosterBlob, downloadBlob } from './services/imageExporter';
-
-// --- TOUCH TYPES ---
-interface TouchDragItem {
-  id: string;
-  x: number;
-  y: number;
-  source: 'pool' | 'grid';
-  sourceCellId?: string;
-  offsetX: number;
-  offsetY: number;
-  width: number;
-  height: number;
-}
 
 export default function App() {
   const exportRef = useRef<HTMLDivElement>(null);
@@ -35,22 +22,17 @@ export default function App() {
     staffList.find(s => s.id === selectedStaffId), 
   [selectedStaffId, staffList]);
 
-  // Touch Drag State
-  const [touchDragItem, setTouchDragItem] = useState<TouchDragItem | null>(null);
-
   // Helper to get staff by role (allows multiple assignments)
   const getStaffByRole = useCallback((role: 'PT' | 'Support') => {
     return staffList.filter(s => s.role === role);
   }, [staffList]);
 
   // Calculate FTE for Physio staff
-  // 1 assignment = 0.25 FTE
   const physioFTE = useMemo(() => {
     let count = 0;
     Object.values(roster).forEach(staffIds => {
       staffIds.forEach(id => {
         const staff = staffList.find(s => s.id === id);
-        // Only count PT assignments towards Physio Manpower FTE
         if (staff?.role === 'PT') {
           count++;
         }
@@ -72,155 +54,9 @@ export default function App() {
     return { valid: true };
   };
 
-  // --- Common Roster Update Logic ---
-
-  const moveStaff = (staffId: string, targetCellId: string, sourceCellId?: string) => {
-    const staff = staffList.find(s => s.id === staffId);
-    if (!staff) return;
-
-    const columnId = targetCellId.split('-').slice(1).join('-');
-    const validation = isValidPlacement(staff, columnId);
-    if (!validation.valid) {
-      alert(validation.error);
-      return;
-    }
-
-    setRoster(prev => {
-      const newRoster = { ...prev };
-      // Remove from source if applicable
-      if (sourceCellId) {
-        newRoster[sourceCellId] = (newRoster[sourceCellId] || []).filter(id => id !== staffId);
-      }
-      // Add to target
-      const currentCell = newRoster[targetCellId] || [];
-      if (!currentCell.includes(staffId)) {
-        newRoster[targetCellId] = [...currentCell, staffId];
-      }
-      return newRoster;
-    });
-  };
-
-  const removeStaffFromCell = (staffId: string, cellId: string) => {
-    setRoster(prev => {
-      const newRoster = { ...prev };
-      newRoster[cellId] = (newRoster[cellId] || []).filter(id => id !== staffId);
-      return newRoster;
-    });
-  };
-
-  // --- Mouse Drag Handlers (Desktop) ---
-
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string, source: 'pool' | 'grid', sourceCellId?: string) => {
-    const item: DragItem = { id, source, sourceCellId };
-    e.dataTransfer.setData('application/json', JSON.stringify(item));
-    e.dataTransfer.effectAllowed = 'move';
-    if (selectedStaffId) setSelectedStaffId(null);
-  };
-
-  const handleDropOnCell = (e: React.DragEvent<HTMLDivElement>, targetCellId: string) => {
-    e.preventDefault();
-    const data = e.dataTransfer.getData('application/json');
-    if (!data) return;
-
-    const item: DragItem = JSON.parse(data);
-    moveStaff(item.id, targetCellId, item.source === 'grid' ? item.sourceCellId : undefined);
-  };
-
-  const handleDropOnPool = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const data = e.dataTransfer.getData('application/json');
-    if (!data) return;
-    const item: DragItem = JSON.parse(data);
-
-    if (item.source === 'grid' && item.sourceCellId) {
-      removeStaffFromCell(item.id, item.sourceCellId);
-    }
-  };
-
-  // --- Touch Drag Handlers (Mobile) ---
-
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, id: string, source: 'pool' | 'grid', sourceCellId?: string) => {
-    // We allow the browser to handle the start, but we capture metrics.
-    // The Magnet component has touch-action: none, which prevents scrolling.
-    
-    const touch = e.touches[0];
-    const target = e.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    
-    // Calculate offset so the item doesn't jump to center of finger
-    const offsetX = touch.clientX - rect.left;
-    const offsetY = touch.clientY - rect.top;
-
-    setTouchDragItem({
-      id,
-      x: touch.clientX,
-      y: touch.clientY,
-      source,
-      sourceCellId,
-      offsetX,
-      offsetY,
-      width: rect.width,
-      height: rect.height,
-    });
-    
-    if (selectedStaffId) setSelectedStaffId(null);
-  };
-
-  // Global Touch Move/End Listeners
-  useEffect(() => {
-    if (!touchDragItem) return;
-
-    const handleWindowTouchMove = (e: TouchEvent) => {
-      if (e.cancelable) e.preventDefault(); // Stop scrolling while dragging
-      const touch = e.touches[0];
-      setTouchDragItem(prev => prev ? { ...prev, x: touch.clientX, y: touch.clientY } : null);
-    };
-
-    const handleWindowTouchEnd = (e: TouchEvent) => {
-       const touch = e.changedTouches[0];
-       
-       // Find drop target
-       const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
-       
-       // Check for Grid Cell
-       const cellElement = elements.find(el => el.hasAttribute('data-cell-id'));
-       
-       // Check for Pool Area (Sidebar on desktop, or anywhere outside board)
-       const poolElement = elements.find(el => el.hasAttribute('data-pool-area'));
-
-       if (cellElement) {
-          const targetCellId = cellElement.getAttribute('data-cell-id');
-          if (targetCellId) {
-             moveStaff(touchDragItem.id, targetCellId, touchDragItem.source === 'grid' ? touchDragItem.sourceCellId : undefined);
-          }
-       } else if (poolElement || (touchDragItem.source === 'grid' && !cellElement)) {
-          // Dropped back to pool (or outside grid)
-          if (touchDragItem.source === 'grid' && touchDragItem.sourceCellId) {
-             removeStaffFromCell(touchDragItem.id, touchDragItem.sourceCellId);
-          }
-       }
-
-       setTouchDragItem(null);
-    };
-
-    // Add passive: false to allow preventDefault (stopping scroll)
-    window.addEventListener('touchmove', handleWindowTouchMove, { passive: false });
-    window.addEventListener('touchend', handleWindowTouchEnd);
-    window.addEventListener('touchcancel', () => setTouchDragItem(null));
-
-    return () => {
-      window.removeEventListener('touchmove', handleWindowTouchMove);
-      window.removeEventListener('touchend', handleWindowTouchEnd);
-      window.removeEventListener('touchcancel', () => setTouchDragItem(null));
-    };
-  }, [touchDragItem]);
-
-
   // --- Click Handlers ---
 
   const handleStaffClick = (id: string) => {
-    // If dragging recently occurred (touch), ignore the click? 
-    // Usually click fires after touchend. Our drag system clears state on touchend.
     setSelectedStaffId(prev => prev === id ? null : id);
   };
 
@@ -238,6 +74,7 @@ export default function App() {
 
     setRoster(prev => {
       const currentCell = prev[cellId] || [];
+      // Toggle logic: remove if exists, add if not
       if (currentCell.includes(selectedStaffId)) {
         return {
           ...prev,
@@ -369,35 +206,9 @@ export default function App() {
         </div>
       )}
 
-      {/* Touch Drag Ghost Item */}
-      {touchDragItem && (
-        <div 
-          className="fixed z-[100] pointer-events-none opacity-90"
-          style={{
-             left: touchDragItem.x,
-             top: touchDragItem.y,
-             width: touchDragItem.width,
-             height: touchDragItem.height,
-             transform: `translate(-${touchDragItem.offsetX}px, -${touchDragItem.offsetY}px)`
-          }}
-        >
-           <div className={`
-              w-full h-full
-              flex items-center justify-center
-              bg-yellow-300 border border-gray-400 shadow-2xl 
-              text-sm font-handwriting font-bold uppercase rounded
-              scale-110 ring-2 ring-blue-500
-              whitespace-nowrap overflow-hidden
-           `}>
-             {staffList.find(s => s.id === touchDragItem.id)?.name}
-           </div>
-        </div>
-      )}
-
-
-      {/* --- HIDDEN EXPORT BOARD (FIXED DESKTOP WIDTH) --- */}
+      {/* --- HIDDEN EXPORT BOARD (FIXED 4:3 RATIO: 1280x960) --- */}
       <div 
-        style={{ position: 'absolute', top: -9999, left: -9999, width: '1280px', height: '800px', zIndex: -10 }}
+        style={{ position: 'absolute', top: -9999, left: -9999, width: '1280px', height: '960px', zIndex: -10 }}
       >
         <RosterBoard 
           ref={exportRef}
@@ -412,9 +223,6 @@ export default function App() {
       {/* --- DESKTOP SIDEBAR (Hidden on mobile) --- */}
       <div 
         className="hidden md:flex w-80 bg-white border-r border-gray-200 flex-col shadow-xl z-20 shrink-0 h-full"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDropOnPool}
-        data-pool-area="true"
       >
         <div className="p-4">
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-1">
@@ -423,7 +231,17 @@ export default function App() {
               {displayedStaff.length}
             </span>
           </h1>
-          <p className="text-sm text-gray-500 mb-3">Drag or click to assign.</p>
+          
+          {/* Desktop "Placing" Indicator in Pool Area */}
+          <div className="mb-3 h-8 flex items-center">
+             {selectedStaffMember ? (
+               <div className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-bold w-full text-center shadow-sm animate-pulse">
+                 Placing: {selectedStaffMember.name}
+               </div>
+             ) : (
+               <p className="text-sm text-gray-500">Click to assign.</p>
+             )}
+          </div>
           
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
             {(['PT', 'Support'] as const).map(role => (
@@ -445,8 +263,6 @@ export default function App() {
             <Magnet 
               key={staff.id}
               staff={staff} 
-              onDragStart={(e: React.DragEvent<HTMLDivElement>, id: string) => handleDragStart(e, id, 'pool')} 
-              onTouchStart={(e: React.TouchEvent<HTMLDivElement>, id: string) => handleTouchStart(e, id, 'pool')}
               onClick={() => handleStaffClick(staff.id)}
               isSelected={selectedStaffId === staff.id}
             />
@@ -477,18 +293,8 @@ export default function App() {
       {/* --- MAIN AREA --- */}
       <div className="flex-1 bg-gray-100 relative flex flex-col h-full overflow-hidden">
         
-        {/* Floating Stamp Indicator */}
-        {selectedStaffMember && (
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 pointer-events-none">
-            <div className="bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 animate-bounce-short">
-              <CheckCircle2 className="w-5 h-5" />
-              <span className="font-bold">Placing: {selectedStaffMember.name}</span>
-            </div>
-          </div>
-        )}
-
         {/* Board Container - Takes up remaining height */}
-        <div className="flex-1 overflow-hidden p-1 md:p-8 flex flex-col" data-pool-area="true">
+        <div className="flex-1 overflow-hidden p-1 md:p-8 flex flex-col">
            <RosterBoard 
              roster={roster}
              staffList={staffList}
@@ -496,9 +302,6 @@ export default function App() {
              selectedStaffId={selectedStaffId}
              onColumnClick={handleColumnHeaderClick}
              onCellClick={handleGridCellClick}
-             onDropOnCell={handleDropOnCell}
-             onDragStart={handleDragStart}
-             onTouchStart={handleTouchStart}
              forceDesktop={false}
            />
         </div>
@@ -507,11 +310,11 @@ export default function App() {
         {/* Fixed height (30dvh) bottom sheet to ensure staff pool is visible without body scroll */}
         <div 
           className="md:hidden bg-white border-t border-gray-300 flex flex-col shadow-[0_-4px_10px_rgba(0,0,0,0.1)] z-20 shrink-0 h-[30dvh]" 
-          data-pool-area="true"
         >
           {/* Header Row: Actions & Toggles */}
           <div className="flex items-center justify-between p-2 border-b border-gray-100 bg-gray-50 shrink-0">
-             <div className="flex gap-2">
+             {/* Left: Action Buttons */}
+             <div className="flex gap-2 w-[25%]">
                 <button 
                   type="button" 
                   onClick={handleReset} 
@@ -528,14 +331,23 @@ export default function App() {
                    {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
                 </button>
              </div>
+
+             {/* Center: Placing Indicator (Horizontally Middle) */}
+             <div className="flex-1 flex justify-center px-1">
+               {selectedStaffMember && (
+                 <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold truncate max-w-[140px] shadow-sm animate-pulse">
+                   Placing: {selectedStaffMember.name}
+                 </div>
+               )}
+             </div>
              
-             {/* Role Toggles */}
-             <div className="flex bg-gray-200 rounded p-0.5">
+             {/* Right: Role Toggles */}
+             <div className="flex bg-gray-200 rounded p-0.5 w-[35%] justify-end">
                {(['PT', 'Support'] as const).map(role => (
                  <button
                    key={role}
                    onClick={() => { setActiveTab(role); setSelectedStaffId(null); }}
-                   className={`px-3 py-1 text-xs font-bold rounded transition-colors ${
+                   className={`flex-1 px-1 py-1 text-[10px] font-bold rounded transition-colors ${
                      activeTab === role ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-500'
                    }`}
                  >
@@ -551,7 +363,6 @@ export default function App() {
                <div key={staff.id} className="touch-none select-none">
                  <Magnet
                     staff={staff}
-                    onTouchStart={(e: React.TouchEvent<HTMLDivElement>, id: string) => handleTouchStart(e, id, 'pool')}
                     onClick={() => handleStaffClick(staff.id)}
                     isSelected={selectedStaffId === staff.id}
                  />

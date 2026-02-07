@@ -10,9 +10,6 @@ interface RosterBoardProps {
   selectedStaffId: string | null;
   onColumnClick?: (colId: string) => void;
   onCellClick?: (cellId: string) => void;
-  onDropOnCell?: (e: React.DragEvent<HTMLDivElement>, cellId: string) => void;
-  onDragStart?: (e: React.DragEvent<HTMLDivElement>, id: string, source: 'pool' | 'grid', sourceCellId?: string) => void;
-  onTouchStart?: (e: React.TouchEvent<HTMLDivElement>, id: string, source: 'pool' | 'grid', sourceCellId?: string) => void;
   forceDesktop?: boolean;
 }
 
@@ -23,9 +20,6 @@ export const RosterBoard = forwardRef<HTMLDivElement, RosterBoardProps>(({
   selectedStaffId,
   onColumnClick,
   onCellClick,
-  onDropOnCell,
-  onDragStart,
-  onTouchStart,
   forceDesktop = false
 }, ref) => {
 
@@ -89,9 +83,6 @@ export const RosterBoard = forwardRef<HTMLDivElement, RosterBoardProps>(({
                     <GridCell
                       id={cellId}
                       staffInCell={staffInCell}
-                      onDrop={onDropOnCell}
-                      onDragStart={onDragStart ? (e: React.DragEvent<HTMLDivElement>, sid: string, from: string) => onDragStart(e, sid, 'grid', from) : undefined}
-                      onTouchStart={onTouchStart ? (e: React.TouchEvent<HTMLDivElement>, sid: string, from: string) => onTouchStart(e, sid, 'grid', from) : undefined}
                       onClick={onCellClick ? () => onCellClick(cellId) : undefined}
                       isHighlighted={!!selectedStaffId}
                       forceDesktop={forceDesktop}
