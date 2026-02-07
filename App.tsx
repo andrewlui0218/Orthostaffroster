@@ -360,7 +360,7 @@ export default function App() {
           {/* Scrollable Staff Grid */}
           <div className="flex-1 overflow-y-auto p-2 bg-white grid grid-cols-3 xs:grid-cols-4 gap-2 content-start">
              {displayedStaff.map(staff => (
-               <div key={staff.id} className="touch-none select-none">
+               <div key={staff.id} className="select-none">
                  <Magnet
                     staff={staff}
                     onClick={() => handleStaffClick(staff.id)}
