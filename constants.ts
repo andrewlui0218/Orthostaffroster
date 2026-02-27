@@ -43,7 +43,8 @@ export const INITIAL_STAFF: StaffMember[] = [
   { id: 'yan', name: 'Yan', role: 'PT', defaultColor: 'white' },
   { id: 'yannie', name: 'Yannie', role: 'PT', defaultColor: 'white' },
   { id: 'yuen_ching', name: 'Yuen Ching', role: 'PT', defaultColor: 'white' },
-
+  { id: 'victor_lam', name: 'Victor Lam', role: 'PT', defaultColor: 'white' },
+  
   // Support / PCA
   { id: 'ria', name: 'Ria', role: 'Support', defaultColor: 'white' },
   { id: 'mable', name: 'Mable', role: 'Support', defaultColor: 'white' },
