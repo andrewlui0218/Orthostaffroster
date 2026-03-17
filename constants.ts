@@ -8,6 +8,7 @@ export const INITIAL_STAFF: StaffMember[] = [
   { id: 'arthur', name: 'Arthur', role: 'PT', defaultColor: 'white' },
   { id: 'ashley', name: 'Ashley', role: 'PT', defaultColor: 'white' },
   { id: 'cedric', name: 'Cedric', role: 'PT', defaultColor: 'white' },
+  { id: 'Cherry', name: 'Cherry', role: 'PT', defaultColor: 'white' },
   { id: 'denise', name: 'Denise', role: 'PT', defaultColor: 'white' },
   { id: 'e_chang', name: 'E Chang', role: 'PT', defaultColor: 'white' },
   { id: 'elaine', name: 'Elaine', role: 'PT', defaultColor: 'white' },
