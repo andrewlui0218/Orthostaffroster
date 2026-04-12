@@ -67,6 +67,7 @@ export const INITIAL_STAFF: StaffMember[] = [
   { id: 'allie', name: 'Allie', role: 'Support', defaultColor: 'white' },
   { id: 'karen_sup', name: 'Karen', role: 'Support', defaultColor: 'white' },
   { id: 'wing', name: 'Wing', role: 'Support', defaultColor: 'white' },
+  { id: 'carver', name: 'Carver', role: 'Support', defaultColor: 'white' },
 ];
 
 export const SESSIONS: Session[] = ['1st', '2nd', '3rd', '4th'];
