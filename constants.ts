@@ -19,6 +19,7 @@ export const INITIAL_STAFF: StaffMember[] = [
   { id: 'ham', name: 'Ham', role: 'PT', defaultColor: 'white' },
   { id: 'henry', name: 'Henry', role: 'PT', defaultColor: 'white' },
   { id: 'hy', name: 'HY', role: 'PT', defaultColor: 'white' },
+  { id: 'Ivan', name: 'Ivan', role: 'PT', defaultColor: 'white' },
   { id: 'jamie', name: 'Jamie', role: 'PT', defaultColor: 'white' },
   { id: 'jamie_ip', name: 'Jamie IP', role: 'PT', defaultColor: 'white' },
   { id: 'jessie', name: 'Jessie', role: 'PT', defaultColor: 'white' },
@@ -36,6 +37,7 @@ export const INITIAL_STAFF: StaffMember[] = [
   { id: 'richard', name: 'Richard', role: 'PT', defaultColor: 'white' },
   { id: 'sophia', name: 'Sophia', role: 'PT', defaultColor: 'white' },
   { id: 'stephy', name: 'Stephy', role: 'PT', defaultColor: 'white' },
+  { id: 'Stephanie', name: 'Stephanie', role: 'PT', defaultColor: 'white' },
   { id: 'summer', name: 'Summer', role: 'PT', defaultColor: 'white' },
   { id: 't_chan', name: 'T Chan', role: 'PT', defaultColor: 'white' },
   { id: 't_mak', name: 'T Mak', role: 'PT', defaultColor: 'white' },
@@ -46,7 +48,7 @@ export const INITIAL_STAFF: StaffMember[] = [
   { id: 'yannie', name: 'Yannie', role: 'PT', defaultColor: 'white' },
   { id: 'yuen_ching', name: 'Yuen Ching', role: 'PT', defaultColor: 'white' },
   { id: 'victor_lam', name: 'Victor Lam', role: 'PT', defaultColor: 'white' },
-  { id: 'Ivan', name: 'Ivan', role: 'PT', defaultColor: 'white' },
+
   
   // Support / PCA
   { id: 'ria', name: 'Ria', role: 'Support', defaultColor: 'white' },
